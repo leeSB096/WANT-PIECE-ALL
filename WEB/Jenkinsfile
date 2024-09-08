@@ -48,16 +48,6 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes - Set Image') {
-            steps {
-                script {
-                    // Kubernetes 배포 이미지 업데이트 (새로 추가된 스테이지)
-                    sh "kubectl --kubeconfig=${KUBECONFIG} set image deployment/mokolee-web-deployment web-container=${DOCKER_IMAGE}:latest --record"
-                    sh "kubectl --kubeconfig=${KUBECONFIG} rollout status deployment/mokolee-web-deployment"
-                }
-            }
-        }
-
         stage('Deploy to Kubernetes - Apply Deployment YAML') {
             steps {
                 script {
@@ -67,6 +57,16 @@ pipeline {
             }
         }
     }
+        
+        stage('Deploy to Kubernetes - Set Image') {
+            steps {
+                script {
+                    // Kubernetes 배포 이미지 업데이트 (새로 추가된 스테이지)
+                    sh "kubectl --kubeconfig=${KUBECONFIG} set image deployment/mokolee-web-deployment web-container=${DOCKER_IMAGE}:latest --record"
+                    sh "kubectl --kubeconfig=${KUBECONFIG} rollout status deployment/mokolee-web-deployment"
+                }
+            }
+        }
 
     post {
         always {
