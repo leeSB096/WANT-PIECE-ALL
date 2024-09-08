@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mokoolee-web-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mokoolee-web
+  template:
+    metadata:
+      labels:
+        app: mokoolee-web
+    spec:
+      containers:
+      - name: web-container
+        image: beendoo/want-piece:latest
+        ports:
+        - containerPort: 80
