@@ -13,6 +13,13 @@ pipeline {
                 checkout scm
             }
         }
+
+        stage('Check Directory Structure') {
+            steps {
+                sh 'ls -R'
+            }
+        }
+        
         stage('Build Docker Image') {
             steps {
                 script {
