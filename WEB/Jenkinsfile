@@ -3,8 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'beendoo/want-piece'  // Docker 이미지 이름
-        KUBECONFIG = "/var/lib/jenkins/.kube/config"  // Kubeconfig 파일 경로 (수정된 부분)
-        //KUBECONFIG_CREDENTIALS_ID = 'mokolee-jenkins-kubeconfig-credentials'  // Kubeconfig 자격증명 ID
+        KUBECONFIG = "/var/lib/jenkins/.kube/config"  // Kubeconfig 파일 경로
     }
 
     stages {
@@ -51,22 +50,22 @@ pipeline {
         stage('Deploy to Kubernetes - Apply Deployment YAML') {
             steps {
                 script {
-                    // Kubernetes 클러스터에 배포 YAML 파일을 적용 (기존에 있던 스테이지에서 복사하여 새로 추가한 부분)
+                    // Kubernetes 클러스터에 배포 YAML 파일을 적용
                     sh 'kubectl --kubeconfig=${KUBECONFIG} apply -f kubernetes/mokolee-web-deployment.yaml'
                 }
             }
         }
-    }
-        
+
         stage('Deploy to Kubernetes - Set Image') {
             steps {
                 script {
-                    // Kubernetes 배포 이미지 업데이트 (새로 추가된 스테이지)
+                    // Kubernetes 배포 이미지 업데이트
                     sh "kubectl --kubeconfig=${KUBECONFIG} set image deployment/mokolee-web-deployment web-container=${DOCKER_IMAGE}:latest --record"
                     sh "kubectl --kubeconfig=${KUBECONFIG} rollout status deployment/mokolee-web-deployment"
                 }
             }
         }
+    }
 
     post {
         always {
