@@ -7,6 +7,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-internal: "false"
     service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "deregistration_delay.timeout_seconds=30"
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "HTTP"
+    service.beta.kubernetes.io/aws-load-balancer-target-type: ip
 spec:
   ports:
     - port: 80
