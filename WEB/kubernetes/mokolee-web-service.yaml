@@ -4,7 +4,7 @@ metadata:
   name: mokolee-web-service
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: "alb"
-    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    service.beta.kubernetes.io/aws-load-balancer-internal: "false"
     service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "deregistration_delay.timeout_seconds=30"
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "HTTP"
     service.beta.kubernetes.io/aws-load-balancer-target-type: ip
