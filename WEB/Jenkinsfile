@@ -56,6 +56,15 @@ pipeline {
             }
         }
 
+        stage('Deploy to Kubernetes - Apply Service YAML') {
+            steps {
+                script {
+                    // Kubernetes 클러스터에 서비스 YAML 파일을 적용
+                    sh 'kubectl --kubeconfig=${KUBECONFIG} apply -f WEB/kubernetes/mokolee-web-service.yaml'
+                }
+            }
+        }
+        
         stage('Deploy to Kubernetes - Set Image') {
             steps {
                 script {
