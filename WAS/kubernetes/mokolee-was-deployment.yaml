@@ -32,3 +32,10 @@ spec:
             secretKeyRef:
               name: db-secret
               key: password  # 시크릿에서 DB 비밀번호 가져오기
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
