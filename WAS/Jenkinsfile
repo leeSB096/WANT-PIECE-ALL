@@ -1,0 +1,88 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'beendoo/want-piece-was'  // Docker 이미지 이름
+        KUBECONFIG = "/var/lib/jenkins/.kube/config"  // Kubeconfig 파일 경로
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Git 리포지토리에서 소스 코드 가져오기
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], 
+                    userRemoteConfigs: [[url: 'https://github.com/leeSB096/WANT-PIECE-ALL.git']]
+                ])
+            }
+        }
+
+        stage('Check Directory Structure') {
+            steps {
+                sh 'pwd'
+                sh 'ls -R'
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // 현재 Jenkins 작업 디렉터리 절대 경로 확인
+                    def workspace = pwd()
+                    echo "Current workspace is: ${workspace}"
+                    
+                    // 절대 경로로 Docker 이미지 빌드
+                    sh "docker build -t ${DOCKER_IMAGE}:latest ${workspace}/WAS"
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Docker Hub 로그인 및 푸시
+                    withCredentials([usernamePassword(credentialsId: 'mokolee-jenkins-docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                    }
+                    // Docker 이미지 푸시
+                    sh "docker push ${DOCKER_IMAGE}:latest"
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes - Apply Deployment YAML') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding', 
+                    credentialsId: 'mokolee-jenkins-aws-credentials'
+                ]]) {
+                    sh 'kubectl --kubeconfig=${KUBECONFIG} apply -f WAS/kubernetes/mokolee-was-deployment.yaml'
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes - Apply Service YAML') {
+            steps {
+                script {
+                    // Kubernetes 클러스터에 서비스 YAML 파일을 적용
+                    sh 'kubectl --kubeconfig=${KUBECONFIG} apply -f WAS/kubernetes/mokolee-was-service.yaml'
+                }
+            }
+        }
+        
+        stage('Deploy to Kubernetes - Set Image') {
+            steps {
+                script {
+                    // Kubernetes 배포 이미지 업데이트
+                    sh "kubectl --kubeconfig=${KUBECONFIG} set image deployment/mokolee-was-deployment was-container=${DOCKER_IMAGE}:latest --record"
+                    sh "kubectl --kubeconfig=${KUBECONFIG} rollout status deployment/mokolee-was-deployment"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'WAS Deployment process finished!'
+        }
+    }
+}
