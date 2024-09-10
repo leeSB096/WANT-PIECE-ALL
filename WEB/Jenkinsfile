@@ -50,8 +50,10 @@ pipeline {
         stage('Deploy to Kubernetes - Apply Deployment YAML') {
             steps {
                 script {
-                    // Kubernetes 클러스터에 배포 YAML 파일을 적용
-                    sh 'kubectl --kubeconfig=${KUBECONFIG} apply -f WEB/kubernetes/mokolee-web-deployment.yaml'
+                    withAWS(credentials: 'mokolee-jenkins-aws-credentials') {
+                        // Kubernetes 클러스터에 배포 YAML 파일을 적용
+                        sh 'kubectl --kubeconfig=${KUBECONFIG} apply -f WEB/kubernetes/mokolee-web-deployment.yaml'
+                    }
                 }
             }
         }
