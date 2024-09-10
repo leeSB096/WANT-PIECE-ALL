@@ -2,16 +2,17 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mokolee-was-service
-  labels:
-    app: mokolee-was
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "HTTP"
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"  # 또는 "alb"로 변경 가능
+    service.beta.kubernetes.io/aws-load-balancer-type: "alb"  # ALB 사용
+    service.beta.kubernetes.io/aws-load-balancer-internal: "false"  # 외부에서 접근 가능
+    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "deregistration_delay.timeout_seconds=30"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "HTTP"  # 백엔드 WAS가 HTTP 사용
+    service.beta.kubernetes.io/aws-load-balancer-target-type: ip  # IP를 통한 대상 그룹 설정
 spec:
-  type: LoadBalancer
-  selector:
-    app: mokolee-was
   ports:
-    - protocol: TCP
-      port: 80  # 외부 포트
-      targetPort: 8080  # 컨테이너에서 사용하는 포트
+    - port: 80
+      targetPort: 8080  # WAS 컨테이너가 8080 포트에서 동작 중
+      protocol: TCP
+  selector:
+    app: mokolee-was  # WAS 앱 선택자
+  type: LoadBalancer
